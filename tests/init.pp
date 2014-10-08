@@ -9,4 +9,6 @@
 # Learn more about module testing here:
 # http://docs.puppetlabs.com/guides/tests_smoke.html
 #
-include java
+java { "1.7.0_67":
+    package_name => "jdk-foo",
+}

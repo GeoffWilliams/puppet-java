@@ -44,11 +44,19 @@ define java($package_name = "jdk", $package_release = "fcs") {
         fail("only x86_64 architecture supported -- see Australia Post Infrastructure Standard, Apache Tomcat, JDK binaries")
     }
 
-    $full_version = "${title}-${package_release}"
+    if ($title == "latest") {
+        $version = "present"
+    } else { 
+        if ($package_release) {  
+            $version = "${title}-${package_release}"
+        } else {
+            $version = $title
+        }
+    }
 
     package { "${package_name}-${title}":
+        ensure => $version,
         name   => $package_name,
-        ensure => $full_version,
     }
 
 }
