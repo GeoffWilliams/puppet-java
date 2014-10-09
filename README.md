@@ -7,7 +7,6 @@
 3. [Setup - The basics of getting started with java](#setup)
     * [What java affects](#what-java-affects)
     * [Setup requirements](#setup-requirements)
-    * [Beginning with java](#beginning-with-java)
 4. [Usage - Configuration options and additional functionality](#usage)
 5. [Reference - An under-the-hood peek at what the module is doing and how](#reference)
 5. [Limitations - OS compatibility, etc.](#limitations)
@@ -15,65 +14,62 @@
 
 ## Overview
 
-A one-maybe-two sentence summary of what the module does/what problem it solves.
-This is your 30 second elevator pitch for your module. Consider including
-OS/Puppet version it works with.
+Install Oracle Java from RPMs on redhat family OS
 
 ## Module Description
 
-If applicable, this section should have a brief description of the technology
-the module integrates with and what that integration enables. This section
-should answer the questions: "What does this module *do*?" and "Why would I use
-it?"
+Downloads Java RPMs from a location on your network (using nanlui-staging) then
+installs using the puppet RPM provider passing the --oldpackage option to allow
+old packages to be installed alongside each other.
 
-If your module has a range of functionality (installation, configuration,
-management, etc.) this is the time to mention it.
+Requires a suitable location to download from
 
 ## Setup
 
 ### What java affects
 
-* A list of files, packages, services, or operations that the module will alter,
-  impact, or execute on the system it's installed on.
-* This is a great place to stick any warnings.
-* Can be in list or paragraph form.
+* Installs the Java binaries at the location the RPM has packed them to install 
+  to.  This is the /usr/java directory at time of writing
+* The RPM files will be made available locally at the location passed by the 
+  `local_dir` variable.  Defaults to `/var/cache/java_rpms`
+* The RPM itself controls the value of the /usr/java/latest symlink
 
-### Setup Requirements **OPTIONAL**
+### Setup Requirements
 
-If your module requires anything extra before setting up (pluginsync enabled,
-etc.), mention it here.
-
-### Beginning with java
-
-The very basic steps needed for a user to get the module up and running.
-
-If your most recent release breaks compatibility or requires particular steps
-for upgrading, you may wish to include an additional section here: Upgrading
-(For an example, see http://forge.puppetlabs.com/puppetlabs/firewall).
+* You must have a suitable location to download the RPMs from.  You are advised
+  to NOT store the RPMs in a yum repository as the Oracle Java RPMs will not 
+  allow different versions of Java to be installed at the same time if using 
+  yum
+* You must RENAME the RPM file downloaded from oracle to reflect its declared
+  pacackage name.  See guidance in manifests/init.pp
 
 ## Usage
 
-Put the classes, types, and resources for customizing, configuring, and doing
-the fancy stuff with your module here.
+Install two versions of JDK alongside each other.  Supply a title array of 
+versions to install (or have multiple java{...} declarations).  The module will
+attempt to download these RPMs from wherever `download_site` is set to
+
+    java { ["jdk-1.7.0_65-fcs.x86_64.rpm", "jdk-1.7.0_67-fcs.x86_64.rpm"]:
+        download_site => "http://172.16.1.101",
+    }
+
+Uninstall a specific Java package from the system
+    java { "jdk-1.7.0_62-fcs.x86_64.rpm":
+        ensure => absent,
+    }
 
 ## Reference
 
-Here, list the classes, types, providers, facts, etc contained in your module.
-This section should include all of the under-the-hood workings of your module so
-people know what the module is touching on their system but don't need to mess
-with things. (We are working on automating this section!)
+### manifests/init.pp 
+Defined type `java` and comprehensive inline documentation
+
+### tests/init.pp 
+Smoke test for multiple versions and package removal
+
+### spec/defines/java_spec.rb
+Ruby rspec tests.  Run with `rake spec`  
 
 ## Limitations
 
-This is where you list OS compatibility, version compatibility, etc.
+Only supports RedHat OS family
 
-## Development
-
-Since your module is awesome, other users will want to play with it. Let them
-know what the ground rules for contributing are.
-
-## Release Notes/Contributors/Etc **Optional**
-
-If you aren't using changelog, put your release notes here (though you should
-consider using changelog). You may also add any additional sections you feel are
-necessary or important to include here. Please use the `## ` header.
