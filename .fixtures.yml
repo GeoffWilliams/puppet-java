@@ -1,3 +1,7 @@
 fixtures:
+  forge_modules:
+    staging:
+      repo: "nanliu/staging"
+      ref: "1.0.0"
   symlinks:
     java: "#{source_dir}"

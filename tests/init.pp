@@ -1,14 +1,13 @@
-# The baseline for module testing used by Puppet Labs is that each manifest
-# should have a corresponding test manifest that declares that class or defined
-# type.
+# Test installing several Java versions alongside each other and removal
+# of an outdated version.
 #
-# Tests are then run by using puppet apply --noop (to check for compilation
-# errors and view a log of events) or by fully applying the test in a virtual
-# environment (to compare the resulting system state to the desired state).
-#
-# Learn more about module testing here:
-# http://docs.puppetlabs.com/guides/tests_smoke.html
-#
-java { "1.7.0_67":
-    package_name => "jdk-foo",
+# run with puppet apply --noop otherwise you will get failures due to 
+# missing pacakges
+
+java { ["jdk-1.7.0_65-fcs.x86_64.rpm", "jdk-1.7.0_67-fcs.x86_64.rpm"]:
+    download_site => "http://172.16.1.101",
+}
+
+java { "jdk-1.7.0_62-fcs.x86_64.rpm":
+    ensure => absent,
 }

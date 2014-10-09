@@ -1,116 +1,137 @@
 require 'spec_helper'
 describe 'java', :type => :define do
-    context "fails on i568" do
+    context "defaults fails" do
         let :facts do
             {
-                :architecture => "i586"
+                :osfamily => "redhat",
             }
         end
         let :title do
-            "1.7.0_67"
-        end
-        it "non x64 should cause failure" do
-            expect { subject }.to raise_error(/only x86_64 architecture supported/)
-        end
-    end
-    context "test defaults" do
-        let :facts do 
-            {
-                :architecture => "x86_64"
-            }
-        end
-        let :title do
-            "latest"
+            "foobar"
         end
         it { 
-            should contain_package("jdk-latest").with(
-                "ensure" => "present",
-                "name"   => "jdk",
-            )
+            expect { subject }.to raise_error(/must supply download_site/)
         }
     end
-    context "test specific version" do
+    context "fails on non-redhat os family" do
         let :facts do
             {
-                :architecture => "x86_64"
+                :osfamily => "debian",
             }
         end
         let :title do
-            "1.7.0_67"
+            "jdk-1.7.0_67-fcs.x86_64"
         end
         it {
-            # by default rpms from oracle are -fcs releases
-            should contain_package("jdk-1.7.0_67").with(
-                "ensure" => "1.7.0_67-fcs",
-                "name"   => "jdk",
-            )
+            expect { subject }.to raise_error(/only supports the RedHat/)
         }
     end
-    context "test custom package name; default release" do
+    context "default rpm filename must fail" do
         let :facts do
             {
-                :architecture => "x86_64"
+                :osfamily => "redhat",
             }
         end
         let :title do
-            "1.2.3"
+            "jdk-7u67-linux-x64.rpm"
         end
         let :params do
             {
-                :package_name => 'foo-jdk-foo',
+                :download_site => "http://foobar.com/",
             }
         end
         it {
-            should contain_package("foo-jdk-foo-1.2.3").with(
-                "ensure" => "1.2.3-fcs",
-                "name"   => "foo-jdk-foo",
-            )
+            expect { subject }.to raise_error(/must be renamed/)
         }
     end
-    context "test custom package name; no release" do
+    context "ensure=>absent must uninstall" do
         let :facts do
             {
-                :architecture => "x86_64"
+                :osfamily => "redhat",
             }
         end
         let :title do
-            "1.2.3"
+            "jdk-1.7.0_62-fcs.x86_64"
         end
         let :params do
             {
-                :package_name    => 'foo-jdk-foo',
-                :package_release => false,
+                :ensure       => "absent",
             }
         end
         it {
-            should contain_package("foo-jdk-foo-1.2.3").with(
-                "ensure" => "1.2.3",
-                "name"   => "foo-jdk-foo",
+            should contain_package("jdk-1.7.0_62-fcs.x86_64").with(
+                "provider" => "rpm",
+                "ensure"   => "absent",
             )
         }
     end
-    context "test custom package name; custom release" do
+    context "uses rpm to install package" do
         let :facts do
             {
-                :architecture => "x86_64"
+                :osfamily => "redhat",
             }
         end
         let :title do
-            "1.2.3"
+            "jdk-1.7.0_67-fcs.x86_64"
         end
         let :params do
             {
-                :package_name    => 'foo-jdk-foo',
-                :package_release => "bar",
+                :download_site   => "http://foobar.com",
             }
         end
         it {
-            should contain_package("foo-jdk-foo-1.2.3").with(
-                "ensure" => "1.2.3-bar",
-                "name"   => "foo-jdk-foo",
+            should contain_package("jdk-1.7.0_67-fcs.x86_64").with(
+                "ensure"          => "present",
+                "name"            => "jdk-1.7.0_67-fcs.x86_64",
+                "provider"        => "rpm",
+                "install_options" => "--oldpackage",
             )
         }
     end
-
+    context "install_options evaluated if set" do
+        let :facts do
+            {
+                :osfamily => "redhat",
+            }
+        end
+        let :title do
+            "jdk-1.7.0_67-fcs.x86_64"
+        end
+        let :params do
+            {
+                :download_site   => "http://foobar.com/",
+                :install_options => "--foobar",
+            }
+        end
+        it {
+            should contain_package("jdk-1.7.0_67-fcs.x86_64").with(
+                "ensure"          => "present",
+                "name"            => "jdk-1.7.0_67-fcs.x86_64",
+                "provider"        => "rpm",
+                "install_options" => "--foobar",
+            )
+        }
+    end
+    context "local_dir must be created" do
+        let :facts do
+            {
+                :osfamily => "redhat",
+            }
+        end
+        let :title do
+            "jdk-1.7.0_67-fcs.x86_64"
+        end
+        let :params do
+            {
+                :download_site   => "http://foobar.com/",
+                :local_dir       => "/var/repos/foo",
+            }
+        end
+        it {
+            should contain_file("/var/repos/foo").with(
+                "ensure"          => "directory",
+            )
+        }
+    end
 end 
 
