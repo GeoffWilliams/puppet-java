@@ -99,59 +99,56 @@ define java($download_site = undef,
             $local_dir = "/var/cache/java_rpms",
             $install_options = "--oldpackage") {
 
-    if ( $::osfamily != "redhat" ) {
-        fail("This Java module only supports the RedHat OS family")
+  if ( $::osfamily != "redhat" ) {
+    fail("This Java module only supports the RedHat OS family")
+  }
+
+  $rpm_file = $title
+  if ($rpm_file =~ /^jdk-\d+u\d+-linux-.*\.rpm$/) {
+    fail("JDK .RPM files must be renamed to match the declared package eg mv jdk-7u67-linux-x64.rpm jdk-1.7.0_67-fcs.x86_64.rpm")
+  }
+
+  # need to tell the rpm provider the name of the PACKAGE which is the name of the
+  # file with .rpm removed, otherwise it will attempt to reinstall it every time
+  $rpm_name = regsubst($rpm_file, '\.rpm', '')
+  $local_file   = "${local_dir}/${rpm_file}"
+  $download_url = "${download_site}/${rpm_file}"
+  if ($install_options) {
+    $_install_options  = $install_options
+  } else {
+    # install options as passed to Package must be a string or hash...
+    $_install_options = ""
+  }
+
+  if ($ensure == present) {
+    if (! $download_site) {
+      fail("must supply download_site if installing RPMs.  download_site is the location to download .rpm files from")
     }
 
-    $rpm_file = $title
-    if ($rpm_file =~ /^jdk-\d+u\d+-linux-.*\.rpm$/) {
-        fail("JDK .RPM files must be renamed to match the declared package eg mv jdk-7u67-linux-x64.rpm jdk-1.7.0_67-fcs.x86_64.rpm")
+    if (! defined(File[$local_dir])) {
+      file { $local_dir:
+        ensure => directory,
+        owner  => "root",
+        group  => "root",
+        mode   => "0755",
+      }
     }
 
-    # need to tell the rpm provider the name of the PACKAGE which is the name of the
-    # file with .rpm removed, otherwise it will attempt to reinstall it every time
-    $rpm_name = regsubst($rpm_file, '\.rpm', '')
-    $local_file   = "${local_dir}/${rpm_file}"
-    $download_url = "${download_site}/${rpm_file}"
-    if ($install_options) {
-        $_install_options  = $install_options
-    } else {
-        # install options as passed to Package must be a string or hash...
-        $_install_options = ""
+    staging::file { $rpm_file:
+      source => $download_url,
+      target => $local_file,
     }
 
-    if ($ensure == present) {
-        if (! $download_site) {
-            fail("must supply download_site if installing RPMs.  download_site is the location to download .rpm files from")
-        }
+    $source_requirements = Staging::File[$rpm_file]
+  } else {
+    $source_requirements = []
+  }
 
-        if (! defined(File[$local_dir])) {
-            file { $local_dir:
-                ensure => directory,
-                owner  => "root",
-                group  => "root",
-                mode   => "0755",
-            }
-        }
-
-        staging::file { $rpm_file:
-            source => $download_url,
-            target => $local_file,
-        }
-
-        $source_requirements = Staging::File[$rpm_file]
-    } else {
-        $source_requirements = []
-    }
-
-    package { $rpm_name:
-        ensure          => $ensure,
-        provider        => "rpm",
-        source          => $local_file,
-        install_options => $_install_options,
-        require         => $source_requirements,
-    }
-        
-
-
+  package { $rpm_name:
+    ensure          => $ensure,
+    provider        => "rpm",
+    source          => $local_file,
+    install_options => $_install_options,
+    require         => $source_requirements,
+  }
 }
