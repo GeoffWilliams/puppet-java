@@ -1,12 +1,12 @@
 {
-  "name": "auspost-java",
-  "version": "0.1.0",
-  "author": "auspost",
-  "summary": null,
+  "name": "geoffwilliams-java",
+  "version": "1.0.0",
+  "author": "Geoff Williams <geoff.williams@puppetlabs.com>",
+  "summary": "Install Oracle Java from RPMs on redhat family OS",
   "license": "Apache 2.0",
-  "source": "",
-  "project_page": null,
-  "issues_url": null,
+  "source": "https://github.com/GeoffWilliams/puppet-java",
+  "project_page": "https://github.com/GeoffWilliams/puppet-java",
+  "issues_url": "https://github.com/GeoffWilliams/puppet-java/issues",
   "dependencies": [
     {
       "name": "puppetlabs-stdlib",
