@@ -1,4 +1,5 @@
 # java
+[![Build Status](https://travis-ci.org/GeoffWilliams/puppet-java.svg?branch=master)](https://travis-ci.org/GeoffWilliams/puppet-java)
 
 #### Table of Contents
 
