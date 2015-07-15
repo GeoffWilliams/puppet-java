@@ -151,4 +151,7 @@ define java($download_site = undef,
     install_options => $_install_options,
     require         => $source_requirements,
   }
+
+  # create graph node so it can be monitored for events
+  file { "/usr/java/latest": }
 }
