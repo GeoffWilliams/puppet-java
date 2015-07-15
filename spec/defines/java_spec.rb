@@ -10,7 +10,7 @@ describe 'java', :type => :define do
       "foobar"
     end
     it { 
-      expect { subject }.to raise_error(/must supply download_site/)
+      expect { should compile }.to raise_error(/must supply download_site/)
     }
   end
 
@@ -24,7 +24,7 @@ describe 'java', :type => :define do
       "jdk-1.7.0_67-fcs.x86_64"
     end
     it {
-      expect { subject }.to raise_error(/only supports the RedHat/)
+      expect { should compile }.to raise_error(/only supports the RedHat/)
     }
   end
 
@@ -43,7 +43,7 @@ describe 'java', :type => :define do
       }
     end
     it {
-      expect { subject }.to raise_error(/must be renamed/)
+      expect { should compile }.to raise_error(/must be renamed/)
     }
   end
 
